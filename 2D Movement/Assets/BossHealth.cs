@@ -24,16 +24,11 @@ public class BossHealth : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Testing
-    	testDamage += 1;
-    	if(testDamage >= 10){
-    		testDamage = 0;
-    		TakeDamage(1000);
-    	}
+        
 
     }
 
-    void TakeDamage(int amount){
+    public void TakeDamage(int amount){
 
     	currentHealth -= amount;
 

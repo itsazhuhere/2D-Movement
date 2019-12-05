@@ -50,10 +50,10 @@ public class PlayerHealth : MonoBehaviour
     }
 
 
-    public void TakeDamage (int amount)
+    public void TakeDamage (int amount, bool triggerDamage=true)
     {
         // Set the damaged flag so the screen will flash.
-        damaged = true;
+        damaged = triggerDamage;
 
         // Reduce the current health by the damage amount.
         currentHealth -= amount;
@@ -70,6 +70,13 @@ public class PlayerHealth : MonoBehaviour
             // ... it should die.
             Death ();
         }
+    }
+
+    public void LevelUp(int newMaxHealth){
+        startingHealth = newMaxHealth;
+        currentHealth = newMaxHealth;
+        healthSlider.maxValue = newMaxHealth;
+        TakeDamage(0, false);
     }
 
 

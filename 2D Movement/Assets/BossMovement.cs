@@ -22,9 +22,6 @@ public class BossMovement : MonoBehaviour
         bossBody.velocity = new Vector2(moveSpeed, 0);
         movingLeft = false;
         bossBody.MovePosition(new Vector3(rightBound, bossBody.position.y, 0));
-
-        Debug.Log(leftBound);
-        Debug.Log(rightBound);
     }
 
     // Update is called once per frame
@@ -33,13 +30,11 @@ public class BossMovement : MonoBehaviour
     	//Debug.Log(bossBody.position.x);
         if(movingLeft && bossBody.position.x <= leftBound){
         	//start moving right at the boss's move speed
-        	Debug.Log("switchRight");
         	bossBody.velocity = new Vector2(moveSpeed, 0);
         	movingLeft = false;
         }
         else if(!movingLeft && bossBody.position.x >= rightBound){
         	//start moving right at the boss's move speed
-        	Debug.Log("switchLeft");
         	bossBody.velocity = new Vector2(-moveSpeed, 0);
         	movingLeft = true;
         }
