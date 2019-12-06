@@ -9,8 +9,17 @@ public class BossHealth : MonoBehaviour
     [SerializeField] public int currentHealth;                                   // The current health the player has.
     [SerializeField] public Slider healthSlider;
     [SerializeField] public Text healthValue;
-
+    public float lootChance = 0.1f;
+    public float powerUpChance = 0.8f; //right now we have a binary relationship between power ups and weapon drops
     int testDamage = 0;
+
+    public Transform powerUpSpawn;
+
+    List<string> powerUpNames = new List<string>(){"invincible", "speed", "bullet"};
+
+
+    [SerializeField] public GameObject powerUpPrefab;
+
 
 
     // Start is called before the first frame update
@@ -25,6 +34,35 @@ public class BossHealth : MonoBehaviour
     void Update()
     {
         
+
+    }
+
+    public void DropLoot(){
+        //certain chance of dropping loot
+        float randVal = Random.value;
+        if (randVal >= lootChance){
+            return;
+        }
+
+        //dropping loot
+        GameObject playerRef = this.gameObject;
+
+        //determining if power up or weapon
+        randVal = Random.value;
+        if(randVal < powerUpChance){
+            //dropping powerup
+            int powerUpNum = Random.Range(0,3);
+            GameObject pUp = Instantiate(powerUpPrefab);
+            PowerUpLogic logic = pUp.GetComponent<PowerUpLogic>();
+            logic.SetPosition(powerUpSpawn);
+            logic.powerUpName = powerUpNames[powerUpNum];
+
+        }
+        else{
+            //dropping weapon
+        }
+
+        Debug.Log("drop");
 
     }
 

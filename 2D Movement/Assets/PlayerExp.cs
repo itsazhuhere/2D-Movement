@@ -15,6 +15,9 @@ public class PlayerExp : MonoBehaviour
 
     public int bulletDamage = 5;
 
+    public int bulletCount = 1;
+    public int bulletUpgrade = 3;
+
 
     public float damageScaling = 1.5F;
     public float levelUpScaling = 1.5F;
@@ -47,6 +50,9 @@ public class PlayerExp : MonoBehaviour
     		level += 1;
     		levelUp = (int) (levelUp * levelUpScaling);
             bulletDamage = (int) (bulletDamage * damageScaling);
+            if(level % bulletUpgrade == 0){
+                bulletCount += 1;
+            }
 
     		expBar.maxValue = levelUp;
     		levelUI.text = level.ToString();

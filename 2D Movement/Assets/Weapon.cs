@@ -7,11 +7,20 @@ public class Weapon : MonoBehaviour
 
 	public Transform firePoint;
 	float fireRate;
-	float damageMultiplier;
+	float damageMultiplier = 1.0f;
 	float cooldownTime;
+	int numShots=1;
+	public int shotMultiplier = 1;
+	float playerBulletSpeed = 30.0f;
+	float bulletScaling = 1.0f;
 	public float COOLDOWN_TIME = 1f;
 	[SerializeField] GameObject bulletPrefab;
 	public GameObject target;
+	public GameObject playerRef;
+	public PlayerMovement move;
+
+    public float maxArc = 90.0f;
+    public float setArc = 5.0f;
 
 
 	public bool isPlayer;
@@ -24,6 +33,8 @@ public class Weapon : MonoBehaviour
     {
         cooldownTime = COOLDOWN_TIME;
         cam = Camera.main;
+        playerRef = GameObject.FindWithTag("Player");
+        move = playerRef.GetComponent<PlayerMovement>();
     }
 
     // Update is called once per frame
@@ -38,26 +49,92 @@ public class Weapon : MonoBehaviour
     		}
     	}
         cooldownTime -= Time.deltaTime;
+
+        Vector3 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
+        Quaternion rotation = Quaternion.LookRotation(mousePos - transform.position, transform.TransformDirection(Vector3.up));
+        transform.rotation = new Quaternion(0, 0, rotation.z, rotation.w);
+
     }
 
+    public void ChangeGuns(float damage, float cooldown, int shots, float bulletSpeed, float bulletSize){
+    	//weapons that have entirely different bullet/firing functionality (i.e. lasers) will have to be hard coded into the weapon class
+    	//everything else can be done using value changing via this function
+    	damageMultiplier = damage;
+    	cooldownTime = cooldown;
+    	numShots = shots;
+    	playerBulletSpeed = bulletSpeed;
+    	bulletScaling = bulletSize;
+    }
 
+    //public void SwitchToHomingShot()
+    Vector3 DirFromAngle(float angleInDegrees){
+        return new Vector3(Mathf.Sin(angleInDegrees * Mathf.Deg2Rad), Mathf.Cos(angleInDegrees * Mathf.Deg2Rad), 0);
+    }
 
+    public static float AngleOffAroundAxis(Vector3 v, Vector3 forward, Vector3 axis, bool clockwise = false)
+    {
+        Vector3 right;
+        if(clockwise)
+        {
+            right = Vector3.Cross(forward, axis);
+            forward = Vector3.Cross(axis, right);
+        }
+        else
+        {
+            right = Vector3.Cross(axis, forward);
+            forward = Vector3.Cross(right, axis);
+        }
+        return Mathf.Atan2(Vector3.Dot(v, right), Vector3.Dot(v, forward)) * Mathf.Rad2Deg;
+    }
+
+    void SpreadShot(int shots){
+        Vector3 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 direction;
+        direction = mousePos - firePoint.position;
+        direction = direction.normalized;
+        float directionAngle = AngleOffAroundAxis(Vector3.up, direction, Vector3.forward);
+        Vector3 originalDirection = DirFromAngle(directionAngle);
+        Vector3 leftArc = DirFromAngle(directionAngle+setArc);
+        Vector3 rightArc = DirFromAngle(directionAngle-setArc);
+        for(int i=0; i<shots;i++){
+            GameObject go = Instantiate(bulletPrefab);
+            go.transform.localScale *= bulletScaling;
+            BossBulletBehavior b = go.GetComponent<BossBulletBehavior>();
+            
+            b.isPlayer = true;
+            b.playerBulletSpeed = playerBulletSpeed;
+            go.transform.position = new Vector2(firePoint.position.x, firePoint.position.y);
+            
+
+            b.Move(Vector3.Slerp(leftArc, rightArc, (float)i / (float)(shots-1)));
+            //b.Move(originalDirection);
+            
+        }
+        cooldownTime = COOLDOWN_TIME;
+
+    }
 
     void Shoot()
     {
     	if(cooldownTime <= 0)
     	{
+    		int totalShots = move.GetShootCount();
+            if(isPlayer && totalShots > 1){
+                SpreadShot(totalShots);
+                return;
+            }
     		GameObject go = Instantiate(bulletPrefab);
+    		go.transform.localScale *= bulletScaling;
     		Vector3 direction;
     		BossBulletBehavior b = go.GetComponent<BossBulletBehavior>();
     		if(!isPlayer){
     			direction = target.transform.position - firePoint.position;
     		}
     		else{
-    			Debug.Log("playerFire");
     			Vector3 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
     			direction = mousePos - firePoint.position;
     			b.isPlayer = true;
+    			b.playerBulletSpeed = playerBulletSpeed;
     		}
     		go.transform.position = new Vector2(firePoint.position.x, firePoint.position.y);
     		

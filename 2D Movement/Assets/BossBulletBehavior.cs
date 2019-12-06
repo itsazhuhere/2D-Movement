@@ -14,7 +14,7 @@ public class BossBulletBehavior : MonoBehaviour
 	[SerializeField] float speed = 1.0F;
 	public float playerBulletSpeed = 5.0F;
 	public int bulletDamage = 5;
-	public int hitExp = 5;
+	public int hitExp = 50;
 
 
 	public string playerTag = "Player";
@@ -53,11 +53,13 @@ public class BossBulletBehavior : MonoBehaviour
     	}
     	if(isPlayer){
     		if(other.tag == bossTag){
-	    		Debug.Log("hit");
+	    		//Debug.Log("hit");
+
 	    		BossHealth hp = other.gameObject.GetComponent<BossHealth>();
 	    		//give the player exp too
 	    		PlayerExp exp = playerRef.GetComponent<PlayerExp>();
 	    		hp.TakeDamage(exp.bulletDamage);
+                hp.DropLoot();
 	    		exp.GainExp(hitExp);
 
 	    		Destroy(gameObject);
@@ -65,7 +67,7 @@ public class BossBulletBehavior : MonoBehaviour
     	}
     	else{
     		if(other.tag == playerTag){
-	    		Debug.Log("hit");
+	    		//Debug.Log("hit");
 	    		PlayerHealth hp = other.gameObject.GetComponent<PlayerHealth>();
 	    		hp.TakeDamage(bulletDamage);
 	    		Destroy(gameObject);
