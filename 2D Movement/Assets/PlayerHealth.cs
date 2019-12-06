@@ -13,7 +13,7 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] public Image damageImage;                                   // Reference to an image to flash on the screen on being hurt.
     [SerializeField] public float flashSpeed = 5f;                               // The speed the damageImage will fade at.
     [SerializeField] public Color flashColour = new Color(1f, 0f, 0f, 0.1f);     // The colour the damageImage is set to, to flash.
-
+    
     bool damaged;
     bool isDead;
     float flickerInterval = 0.1F;
@@ -28,6 +28,11 @@ public class PlayerHealth : MonoBehaviour
     PlayerMovement spawn;
     SpriteRenderer sprite;
 
+    public Text statBox;
+    StatLogic statLogic;
+
+    int deaths = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -39,6 +44,8 @@ public class PlayerHealth : MonoBehaviour
         spawn = this.gameObject.GetComponent<PlayerMovement>();
         sprite = GetComponent<SpriteRenderer>();
         flickering = false;
+
+        statLogic = statBox.GetComponent<StatLogic>();
     }
 
     // Update is called once per frame
@@ -50,7 +57,8 @@ public class PlayerHealth : MonoBehaviour
         {
             // ... set the colour of the damageImage to the flash colour.
             damageImage.color = flashColour;
-            TemporaryInvincibility(invincibleTime);
+            //removing for now to make the game harder 
+            //TemporaryInvincibility(invincibleTime);
             flickering = true;
         }
         // Otherwise...
@@ -147,6 +155,10 @@ public class PlayerHealth : MonoBehaviour
         spawn.Spawn();
         //We use LevelUp because it already has logic that sets max Hp and refreshes hp
         LevelUp(startingHealth, false);
+        deaths++;
+        statLogic.AddDeath();
+        
         isDead = false;
+
     }
 }

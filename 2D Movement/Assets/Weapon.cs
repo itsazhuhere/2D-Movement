@@ -21,11 +21,25 @@ public class Weapon : MonoBehaviour
 
     public float maxArc = 90.0f;
     public float setArc = 5.0f;
+    public float arcScaling = 0.5f;
 
+
+    SpriteRenderer sprite;
+    public Sprite laserGun;
+    public Sprite defaultGun;
+    public Sprite rocketLauncher;
+    public Sprite giantGun;
 
 	public bool isPlayer;
 
+    bool laserGunSet=false;
+
+    string bulletType;
+
 	Camera cam;
+
+    GameObject bossRef;
+    
 
 
     // Start is called before the first frame update
@@ -35,6 +49,14 @@ public class Weapon : MonoBehaviour
         cam = Camera.main;
         playerRef = GameObject.FindWithTag("Player");
         move = playerRef.GetComponent<PlayerMovement>();
+        sprite = this.gameObject.transform.Find("Fire Point").GetComponent<SpriteRenderer>();
+        if(isPlayer){
+            //SetLaserGun();
+        }
+
+        bossRef = GameObject.FindWithTag("Boss");
+
+        
     }
 
     // Update is called once per frame
@@ -56,7 +78,7 @@ public class Weapon : MonoBehaviour
 
     }
 
-    public void ChangeGuns(float damage, float cooldown, int shots, float bulletSpeed, float bulletSize){
+    public void ChangeGuns(float damage, float cooldown, int shots, float bulletSpeed, float bulletSize, string gunName=""){
     	//weapons that have entirely different bullet/firing functionality (i.e. lasers) will have to be hard coded into the weapon class
     	//everything else can be done using value changing via this function
     	damageMultiplier = damage;
@@ -64,7 +86,35 @@ public class Weapon : MonoBehaviour
     	numShots = shots;
     	playerBulletSpeed = bulletSpeed;
     	bulletScaling = bulletSize;
+        laserGunSet = false;
+
+
+        switch(gunName){
+            case "laser":
+                sprite.sprite = laserGun;
+                bulletType = "laser";
+                break;
+            case "rocket":
+                sprite.sprite = rocketLauncher;
+                bulletType = "rocket";
+                break;
+            case "giant":
+                sprite.sprite = giantGun;
+                bulletType = "";
+                break;
+            default:
+                sprite.sprite = defaultGun;
+                bulletType = "";
+                break;
+        }
     }
+
+    public void SetLaserGun(){
+        //Separate function because I wanted to make some custom functionality but ended up scrapping the changes
+        ChangeGuns(10f, 0.25f, 2, 50f, 1f, "laser");
+
+    }
+
 
     //public void SwitchToHomingShot()
     Vector3 DirFromAngle(float angleInDegrees){
@@ -94,19 +144,22 @@ public class Weapon : MonoBehaviour
         direction = direction.normalized;
         float directionAngle = AngleOffAroundAxis(Vector3.up, direction, Vector3.forward);
         Vector3 originalDirection = DirFromAngle(directionAngle);
-        Vector3 leftArc = DirFromAngle(directionAngle+setArc);
-        Vector3 rightArc = DirFromAngle(directionAngle-setArc);
+        float adjustedArc = setArc*((float)shots/(1.0f+arcScaling));
+        Vector3 leftArc = DirFromAngle(directionAngle+adjustedArc);
+        Vector3 rightArc = DirFromAngle(directionAngle-adjustedArc);
         for(int i=0; i<shots;i++){
             GameObject go = Instantiate(bulletPrefab);
             go.transform.localScale *= bulletScaling;
             BossBulletBehavior b = go.GetComponent<BossBulletBehavior>();
+            b.SetBullet(bulletType);
+            b.bulletDamage = (int)damageMultiplier;
             
             b.isPlayer = true;
             b.playerBulletSpeed = playerBulletSpeed;
             go.transform.position = new Vector2(firePoint.position.x, firePoint.position.y);
             
-
-            b.Move(Vector3.Slerp(leftArc, rightArc, (float)i / (float)(shots-1)));
+            Vector3 lerpDirection = Vector3.Slerp(leftArc, rightArc, (float)i / (float)(shots-1));
+            b.Move(lerpDirection, AngleOffAroundAxis(Vector3.up, lerpDirection, Vector3.back));
             //b.Move(originalDirection);
             
         }
@@ -118,29 +171,42 @@ public class Weapon : MonoBehaviour
     {
     	if(cooldownTime <= 0)
     	{
-    		int totalShots = move.GetShootCount();
-            if(isPlayer && totalShots > 1){
-                SpreadShot(totalShots);
-                return;
-            }
-    		GameObject go = Instantiate(bulletPrefab);
-    		go.transform.localScale *= bulletScaling;
-    		Vector3 direction;
-    		BossBulletBehavior b = go.GetComponent<BossBulletBehavior>();
-    		if(!isPlayer){
-    			direction = target.transform.position - firePoint.position;
-    		}
-    		else{
-    			Vector3 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
-    			direction = mousePos - firePoint.position;
-    			b.isPlayer = true;
-    			b.playerBulletSpeed = playerBulletSpeed;
-    		}
-    		go.transform.position = new Vector2(firePoint.position.x, firePoint.position.y);
-    		
+            if(laserGunSet){
 
-    		b.Move(direction.normalized);
-    		cooldownTime = COOLDOWN_TIME;
+            }
+            else{
+                int totalShots = move.GetShootCount();
+                //int totalShots = 3;
+                if(isPlayer && totalShots > 1){
+                    SpreadShot(totalShots);
+                    return;
+                }
+                GameObject go = Instantiate(bulletPrefab);
+                go.transform.localScale *= bulletScaling;
+                Vector3 direction;
+                BossBulletBehavior b = go.GetComponent<BossBulletBehavior>();
+                
+                if(!isPlayer){
+                    direction = target.transform.position - firePoint.position;
+                }
+                else{
+                    b.SetBullet(bulletType);
+                    b.bulletDamage = (int)damageMultiplier;
+                    Vector3 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
+                    direction = mousePos - firePoint.position;
+                    b.isPlayer = true;
+                    b.playerBulletSpeed = playerBulletSpeed;
+                }
+                go.transform.position = new Vector2(firePoint.position.x, firePoint.position.y);
+                
+                direction = direction.normalized;
+                b.Move(direction, AngleOffAroundAxis(Vector3.up, direction, Vector3.back));
+                
+            }
+
+            cooldownTime = COOLDOWN_TIME;
+
+    		
 
     	}
     	

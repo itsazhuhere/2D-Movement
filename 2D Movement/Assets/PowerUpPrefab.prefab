@@ -124,6 +124,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   powerUpName: 
   playerTag: Player
+  bulletImage: {fileID: 21300000, guid: 49aee41b20a194f40b39776ac969b0f6, type: 3}
+  invincibilityImage: {fileID: 21300000, guid: 2f16e7675d4164e66b291fa4f2d9dd2d, type: 3}
+  speedImage: {fileID: 21300000, guid: 3de52127bd6504925bb991eb8f78c6f0, type: 3}
+  giantGun: {fileID: 21300000, guid: 69570de47c8b8404f96820479918c520, type: 3}
+  laserGun: {fileID: 21300000, guid: ce018c875bbcd4d779d7a6b0eb509620, type: 3}
+  rocketGun: {fileID: 21300000, guid: 9e98af644e3e843ee99b164d773f6e41, type: 3}
 --- !u!50 &-8264050379013839590
 Rigidbody2D:
   serializedVersion: 4

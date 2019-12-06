@@ -7,6 +7,8 @@ TagManager:
   - Through
   - Bullet
   - Boss
+  - Weapon
+  - Ground
   layers:
   - Default
   - TransparentFX
@@ -43,6 +45,9 @@ TagManager:
   m_SortingLayers:
   - name: Background
     uniqueID: 1611635347
+    locked: 0
+  - name: Bullet
+    uniqueID: 2344671373
     locked: 0
   - name: Default
     uniqueID: 0

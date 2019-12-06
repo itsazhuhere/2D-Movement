@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PowerUp : MonoBehaviour
 {
@@ -13,12 +14,21 @@ public class PowerUp : MonoBehaviour
 	PlayerMovement move;
 	PlayerHealth health;
 
+    GameObject weaponRef;
+    Weapon weaponScript;
+
+    public Text eventTextBox;
+    EventScript eventScript;
+
     // Start is called before the first frame update
     void Start()
     {
         move = GetComponent<PlayerMovement>();
         health = GetComponent<PlayerHealth>();
+        eventScript = eventTextBox.GetComponent<EventScript>();
 
+        weaponRef = GameObject.FindWithTag("Weapon");
+        weaponScript = weaponRef.GetComponent<Weapon>();
     }
 
     public void TriggerPowerUp(string powerUpName, float powerUpTime=30.0f){
@@ -30,14 +40,33 @@ public class PowerUp : MonoBehaviour
     	switch(powerUpName){
     		case "speed":
     			move.speedModifier = speedBoost;
+                eventScript.SetText("Speed Up!");
     			break;
     		case "bullet":
                 move.bulletMultiplier = bulletMultiplier;
+                eventScript.SetText("Double Bullets!");
     			break;
     		case "invincible":
     			health.TemporaryInvincibility(powerUpTime);
+                eventScript.SetText("Invincibility!");
     			break;
+            //WEAPONS
+            case "giant":
+                eventScript.SetText("Giant Gun");
+                currentPowerUp = "";
 
+                weaponScript.ChangeGuns(3, 1, 1, 2.0f, 10.0f, "giant");
+                break;
+            case "laser":
+                eventScript.SetText("Laser Gun");
+                currentPowerUp = "";
+                weaponScript.SetLaserGun();
+                break;
+            case "rocket":
+                eventScript.SetText("Rocket Launcher");
+                currentPowerUp = "";
+                weaponScript.ChangeGuns(3, 1, 1, 5.0f, 1.0f, "rocket");
+                break;
     		default:
     			Debug.Log("Unknown powerup: " + powerUpName);
     			currentPowerUp = "";
